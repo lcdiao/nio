@@ -10,6 +10,7 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
+import java.nio.charset.CharacterCodingException;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
 import java.util.Iterator;
@@ -135,8 +136,20 @@ public class NioServer {
                 //将这次读到的数据放入大buffer
                 rbf.flip();
                 bigBf.put(rbf);
-                //为下次读
+                //为下次读，清理Buffer
+                rbf.clear();
             }
+            if (bigBf != null){
+                bigBf.flip();
+                try {
+                    //将字节转为字符，返回接收到的字符串
+                    return decoder.decode(bigBf).toString();
+                } catch (CharacterCodingException e){
+                    e.printStackTrace();
+                }
+            }
+
+            return null;
         }
     }
 }
